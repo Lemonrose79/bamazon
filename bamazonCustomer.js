@@ -37,12 +37,12 @@ function displayInventory() {
         });
         for (let i = 0; i < res.length; i++) {
             let tableID = res[i].id;
-            let tableProd = res[i].product_name;
+            let tableProduct = res[i].product_name;
             let tableDept = res[i].department_name;
             let tablePrice = res[i].price;
             let tableQty = res[i].stock_quantity
             table.push(
-                [tableID, tableProd, tableDept, tablePrice, tableQty]
+                [tableID, tableProduct, tableDept, tablePrice, tableQty]
             );
         }
         console.log(table.toString());
@@ -50,8 +50,8 @@ function displayInventory() {
     });
 };
 
-//customer says what product (ID) they want
-//customer says what qty they want
+//customer chooses product ID
+//customer declares qty needed
 function customer() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
@@ -78,7 +78,7 @@ function customer() {
                         if (isNaN(value) === false) {
                             return true;
                         }
-                        console.log(chalk.yellow("\nEnter a number."));
+                        console.log(chalk.green("\nEnter a number."));
                         return false;
                     }
                 }
@@ -114,7 +114,7 @@ function customer() {
                         ],
                         function (error) {
                             if (error) throw err;
-                            console.log(chalk.green("\nSold!\n"));
+                            console.log(chalk.blue("\nSold!\n"));
                              //give the user the chance to continue shopping
                                 contShopping();
                         }
