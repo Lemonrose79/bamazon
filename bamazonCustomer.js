@@ -3,13 +3,11 @@ require("dotenv").config(); //hidden password
 const mysql = require("mysql"); //sql database
 const inquirer = require("inquirer"); //prompts
 
-
 //not required, but add to user experience
 const chalk = require("chalk"); //colors
 const Table = require("cli-table"); //nicely formatted table
 
-
-//create the connection for sql database
+//create the connection information for the sql database
 const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -28,7 +26,6 @@ connection.connect(function (err) {
 
 //display inventory in table
 function displayInventory() {
-
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
         let table = new Table({
@@ -37,12 +34,12 @@ function displayInventory() {
         });
         for (let i = 0; i < res.length; i++) {
             let tableID = res[i].id;
-            let tableProduct = res[i].product_name;
+            let tableProd = res[i].product_name;
             let tableDept = res[i].department_name;
             let tablePrice = res[i].price;
             let tableQty = res[i].stock_quantity
             table.push(
-                [tableID, tableProduct, tableDept, tablePrice, tableQty]
+                [tableID, tableProd, tableDept, tablePrice, tableQty]
             );
         }
         console.log(table.toString());
@@ -50,8 +47,8 @@ function displayInventory() {
     });
 };
 
-//customer chooses product ID
-//customer declares qty needed
+//customer says what product they want
+//customer says how many units they want
 function customer() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
@@ -78,7 +75,7 @@ function customer() {
                         if (isNaN(value) === false) {
                             return true;
                         }
-                        console.log(chalk.green("\nEnter a number."));
+                        console.log(chalk.yellow("\nEnter a number."));
                         return false;
                     }
                 }
@@ -90,15 +87,17 @@ function customer() {
                         chosenItem = res[i];
                     }
                 }
+
                 //define inventory terms for use
                 let availQty = chosenItem.stock_quantity;
                 let chosenQty = input.qtyBuy;
 
                 //determine if desired qty is greater than avail qty of product
                 if (parseInt(chosenQty) > availQty) {
+                    //return error message
                     console.log(chalk.red("\nSorry. There's not enough inventory of this product.\n"));
                     //give the user the chance to continue shopping
-                    contShopping();
+                    shopAgain();
 
                 } else {
                     //update quantity if the sale can be successfully completed based on inventory
@@ -114,22 +113,23 @@ function customer() {
                         ],
                         function (error) {
                             if (error) throw err;
-                            console.log(chalk.blue("\nSold!\n"));
+                            //give success message (and price)
+                            console.log(chalk.green("\nSold! Your total is\n" + "$" +(chosenQty * (chosenItem.price  * 100) / 100)));
                              //give the user the chance to continue shopping
-                                contShopping();
+                            shopAgain();
                         }
                     )
                 }
             });
     });
 
-    //function to continue shopping or stop the program
-    function    contShopping() {
+    //function to shop again or quit the program
+    function shopAgain() {
         inquirer.prompt([
             {
                 name: "shop",
                 type: "list",
-                message: "Would you like to continue shopping?",
+                message: "Would you like to buy another products?",
                 choices: ["Yes.", "No. Thank you."]
             }
         ]).then(function (input) {
